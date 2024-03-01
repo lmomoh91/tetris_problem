@@ -27,68 +27,76 @@ class Tetris:
                   [0, 1],
                   [1, 1]]}
 
-    def newRow(self):
+    def new_row(self):
         return [0 for _ in range(10)]
 
     def does_figure_fit(self, row, figure_name, pos):
-        # checks to see if a piece fits on the row at given position
-        # check bottom to the top
-        piece = self.figures[figure_name]
+        piece = self.figures.get(figure_name)
+        #iterate through figure row to determine if fits on board
         for i in range(len(piece)):
             figure_row = piece[-1 * (1 + i)]
+            #check if current row is last row on board
             if i + row == len(self.board):
                 return True
-            boardRow = self.board[i + row]
+            board_row = self.board[i + row]
             for j in range(len(figure_row)):
-                if figure_row[j] and boardRow[pos + j]:
+                if figure_row[j] and board_row[pos + j]:
                     return False
         return True
 
-    def remove_completed_rows(self, startRow, numRows):
+    def remove_completed_rows(self, start_row, num_rows):
         # removes full rows from the board
-        # only checks rows between startRow and startRow+numRows
-        fullRows = [i + startRow
-                    for i in range(numRows)
-                    if all(self.board[i + startRow])]
-        for fullRow in sorted(fullRows, reverse=True):
-            del self.board[fullRow]
+        # only checks rows between start_row and start_row+numRows
+        full_rows = [i + start_row
+                    for i in range(num_rows)
+                    if all(self.board[i + start_row])]
+        for completed_row in sorted(full_rows, reverse=True):
+            del self.board[completed_row]
 
     def add_figure_at(self, row, figure_name, pos):
-        # Adds piece at this row.
-        piece = self.figures[figure_name]
+        piece = self.figures.get(figure_name)
         for i in range(len(piece)):
-            pieceRow = piece[-1 * (1 + i)]
+            piece_row = piece[-1 * (1 + i)]
 
             if i + row == len(self.board):
-                self.board += self.newRow(),
-            boardRow = self.board[i + row]
-            for j in range(len(pieceRow)):
-                if pieceRow[j]:
-                    boardRow[pos + j] = pieceRow[j]
+                self.board += self.new_row(),
+            board_row = self.board[i + row]
+            for j in range(len(piece_row)):
+                if piece_row[j]:
+                    board_row[pos + j] = piece_row[j]
         self.remove_completed_rows(row, len(piece))
 
     def add_figure(self, figure_name, pos):
-        # 1.find the first row where piece is blocked
-        # 2.Add the piece at the row above it
-        blockedByRow = None
+
+        blocked_by_row = None
         for row in range(len(self.board) - 1, -1, -1):
             if not self.does_figure_fit(row, figure_name, pos):
-                blockedByRow = row
+                blocked_by_row = row
                 break
 
-        targetRow = 0 if blockedByRow == None else blockedByRow + 1
-        self.add_figure_at(targetRow, figure_name, pos)
+        target_row = 0 if blocked_by_row == None else blocked_by_row + 1
+        self.add_figure_at(target_row, figure_name, pos)
 
     def add_figures(self, figures: list):
+        #parse input row to get figures
         for piece in figures.split(','):
             self.add_figure(piece[0], int(piece[1]))
         return len(self.board)
+
+    @property
+    def view_board(self):
+        for line in enumerate(self.board[::-1]):
+            print(line)
 
 
 if __name__ == '__main__':
     import fileinput
 
     t = Tetris()
-    args = sys.argv[1:]
-    for input_row in fileinput.input(args):
+    args = sys.argv[1:][0]
+    # Take input from stin, should be a file name
+    with open(args) as f:
+        lines = f.readlines()
+    for input_row in lines:
         print(t.add_figures(input_row))
+
