@@ -39,13 +39,13 @@ class Tetris:
         for completed_row in sorted(full_rows, reverse=True):
             del self.board[completed_row]
 
-    def add_figure_at(self, row, figure_name, pos):
+    def add_figure_at(self, row, figure_name: object, pos: object):
         piece = self.figures.get(figure_name)
         for i in range(len(piece)):
             piece_row = piece[-1 * (1 + i)]
 
             if i + row == len(self.board):
-                self.board += (self.new_row(),)
+                self.board += self.new_row()
             board_row = self.board[i + row]
             for j in range(len(piece_row)):
                 if piece_row[j]:
